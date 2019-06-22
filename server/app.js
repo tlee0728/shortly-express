@@ -5,6 +5,8 @@ const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
+// const parseCookies = require('./middleware/cookieParser');
+
 
 const app = express();
 
@@ -14,7 +16,8 @@ app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-
+// app.use(parseCookies)
+// app.use(Auth ///something)
 
 
 app.get('/', 
@@ -85,13 +88,42 @@ app.post('/signup',
   models.Users.get({username})
     .then( (data)  => {
       if (data) {
-        res.redirect('/login');
+        res.redirect('/signup')
+        // res.send('Username already exists');
       } else {
+        console.log("data ----->",data)
         models.Users
         .create({username, password})
         .then( () => {
-          res.redirect('/login');
+          res.redirect('/');
+          // res.send('success');
         })
+      }
+    })
+    .catch(err => {
+      res.status(500).send('error');
+    });
+});
+
+//post /login
+app.post('/login', (req, res, next) => {
+  let username = req.body.username;
+  let password = req.body.password;
+  models.Users.get({username})
+    .then( (data)  => {
+      if (data) {
+        if (models.Users.compare(password, data.password, data.salt)) {
+          // SUCCESS
+          //implement session
+          // models.Session.///
+          res.redirect('/')
+        } else {
+          res.redirect('/login')
+          // res.send('Username and password do not match');
+        }
+      } else {
+        res.redirect('/login')
+        // res.send('Username does not exist');
       }
     })
     // .error(error => {
@@ -102,7 +134,6 @@ app.post('/signup',
     });
 });
 
-//post /login
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
