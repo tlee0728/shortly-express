@@ -5,7 +5,7 @@ const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
-// const parseCookies = require('./middleware/cookieParser');
+const parseCookies = require('./middleware/cookieParser');
 
 
 const app = express();
@@ -16,8 +16,8 @@ app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-// app.use(parseCookies)
-// app.use(Auth ///something)
+app.use(parseCookies);
+app.use(Auth.createSession);
 
 
 app.get('/', 
@@ -113,6 +113,7 @@ app.post('/login', (req, res, next) => {
       if (data) {
         if (models.Users.compare(password, data.password, data.salt)) {
           // SUCCESS
+          //update session with userId of current users
           //implement session
           // models.Session.///
           res.redirect('/')
