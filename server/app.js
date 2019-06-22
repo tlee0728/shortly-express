@@ -91,7 +91,6 @@ app.post('/signup',
         res.redirect('/signup')
         // res.send('Username already exists');
       } else {
-        console.log("data ----->",data)
         models.Users
         .create({username, password})
         .then( () => {
